@@ -1,64 +1,75 @@
-# lessphp v0.3.4-2
-### <http://leafo.net/lessphp>
+# laraveless - Automated LESS compilation for Laravel
 
-`lessphp` is a compiler for LESS written in PHP. The documentation is great,
-so check it out: <http://leafo.net/lessphp/docs/>.
+Thanks to [leafo](https://github.com/leafo) for [lessphp](https://github.com/leafo/lessphp).
 
-Here's a quick tutorial:
+### Quick Start
 
-### How to use in your PHP project
+1. Install the bundle
 
-Copy `lessc.inc.php` to your include directory and include it into your project.
+        php artisan bundle:install laraveless
 
-There are a few ways to interface with the compiler. The easiest is to have it
-compile a LESS file when the page is requested. The static function 
-`lessc::ccompile`, checked compile, will compile the input LESS file only when it
-is newer than the output file.
+1. Add it to your application's `bundles.php`
 
-	try {
-		lessc::ccompile('input.less', 'output.css');
-	} catch (exception $ex) {
-		exit($ex->getMessage());
-	}
+        return array(
+            'laraveless' => array(
+            	'auto' => true,
+            ),
+        );
 
-`lessc::ccompile` is not aware of imported files that change. Read [about
-`lessc::cexecute`](http://leafo.net/lessphp/docs/#compiling_automatically).
+1. Create `application/config/less.php`
 
-Note that all failures with lessc are reported through exceptions.
-If you need more control you can make your own instance of lessc.
+        return array(
+            'directories' => array(
+                ...
+            ),
+            'files' => array(
+                ...
+            ),
+            'snippets' => array(
+                ...
+            ),
+        );
 
-	$input = 'mystyle.less';
+1. That's it, really.
 
-	$lc = new lessc($input);
+### More about `directories`, `files`, and `snippets`
 
-	try {
-		file_put_contents('mystyle.css', $lc->parse());
-	} catch (exception $ex) { ... }
+`laraveless` uses the `directories`, `files`, and `snippets` arrays to create CSS from your LESS. Here's how.
 
-In addition to loading from file, you can also parse from a string like so:
+#### Directories
 
-	$lc = new lessc();
-	$lesscode = 'body { ... }';
-	$out = $lc->parse($lesscode);
+The `directories` array is optional. If you don't have any directories that you want compiled to LESS, you can leave it out; otherwise, you want to specify your directories in `application/config/less.php` as so:
 
-### How to use from the command line
+    return array(
+    	'directories' => array(
+    		path('app') . 'less' => path('public') . 'css',
+    	),
+    );
 
-An additional script has been included to use the compiler from the command
-line. In the simplest invocation, you specify an input file and the compiled
-css is written to standard out:
+That will get all files matching `application/less/*.less` (case-insensitive, non-recursive) and compile them to CSS in the `public/css' directory. For example, the file `application/less/test.less` becomes `public/css/test.css`.
 
-	$ plessc input.less > output.css
+If you want to specify single LESS files or want to specify the output filename, use `files`.
 
-Using the -r flag, you can specify LESS code directly as an argument or, if 
-the argument is left off, from standard in:
+#### Files
 
-	$ plessc -r "my less code here"
+The `files` array is nearly identical to the `directories` array. In `application/config/less.php`:
 
-Finally, by using the -w flag you can watch a specified input file and have it 
-compile as needed to the output file
+    return array(
+    	'files' => array(
+    		path('app') . 'less/source.less' => path('public') . 'css/destination.css',
+    	),
+    );
 
-	$ plessc -w input-file output-file
+That will... you get it, right?... compile `application/less/source.less` to `public/css/destination.css`.
 
-Errors from watch mode are written to standard out.
+#### Snippets
 
+I added snippets just because. They're probably not great practice, but maybe you'll find a use for them. Once again, in `application/config/less.php`:
 
+    return array(
+    	'snippets' => array(
+    		'#content { background: #f00; h1 { color: #0f0; } }' => path('public') . 'css/file.css',
+    	),
+    );
+
+That should be pretty self-explanatory.
