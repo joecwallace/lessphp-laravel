@@ -46,7 +46,7 @@ The `directories` array is optional. If you don't have any directories that you 
     	),
     );
 
-That will get all files matching `application/less/*.less` (case-insensitive, non-recursive) and compile them to CSS in the `public/css' directory. For example, the file `application/less/test.less` becomes `public/css/test.css`.
+That will get all files matching `application/less/*.less` (case-insensitive, non-recursive) and compile them to CSS in the `public/css` directory. For example, the file `application/less/test.less` becomes `public/css/test.css`.
 
 If you want to specify single LESS files or want to specify the output filename, use `files`.
 
@@ -73,3 +73,9 @@ I added snippets just because. They're probably not great practice, but maybe yo
     );
 
 That should be pretty self-explanatory.
+
+### One final note
+
+`laraveless` uses `lessphp`'s `ccompile` method, which means that only source less files modified more recently than the destination css file are compiled, so you shouldn't take a performance hit.
+
+... except for on snippets, which are compiled and written to disk every time the bundle is started.
