@@ -4,11 +4,40 @@ require 'lessc.inc.php';
 
 $config = Config::get('less');
 
-$compile = function($input_file, $output_file)
+$imports = function($file) use (&$imports)
+{
+	$paths = array();
+
+	preg_match_all('/@import\s+"(?P<imports>[^";]+)"/ism', File::get($file), $matches);
+	foreach ($matches['imports'] as $import)
+	{
+		$path = dirname($file) . '/' . $import;
+		if (File::exists($path) || File::exists($path .= '.less'))
+		{
+			$paths[] = $path;
+			$paths = array_merge($paths, $imports($path));
+		}
+	}
+
+	return $paths;
+};
+
+$compile = function($input_file, $output_file) use ($imports)
 {
 	try
 	{
-		lessc::ccompile($input_file, $output_file);
+		$latest = File::modified($input_file);
+		foreach ($imports($input_file) as $import)
+		{
+			$import_modified = File::modified($import);
+			$latest = $import_modified > $latest ? $import_modified : $latest;
+		}
+
+		if (! File::exists($output_file) || $latest > File::modified($output_file))
+		{
+			$cache = lessc::cexecute($input_file);
+			File::put($output_file, $cache['compiled']);
+		}
 	}
 	catch (Exception $ex)
 	{
@@ -42,6 +71,6 @@ if (isset($config['snippets']))
 	$less = new lessc();
 	foreach ($config['snippets'] as $snippet => $css)
 	{
-		file_put_contents($css, $less->parse($snippet));
+		File::put($css, $less->parse($snippet));
 	}
 }
