@@ -1,3 +1,26 @@
+# A note about Laravel 4
+
+With Laravel 4, this bundle is so easy to replicate, I'm not going to support it anymore. I'll give you a quick how-to here though, just in case.
+
+1. Require [lessphp](https://packagist.org/packages/leafo/lessphp) in composer.json
+2. Write some code like this (maybe in your global start file):
+
+```php
+
+$less = new lessc;
+
+// Compile a file
+$less->compileFile('app/less/input.less', 'public/css/output.css');
+
+// Compile based on modified time
+$less->checkedCompile('app/less/input.less', 'public/css/output.css');
+
+// Compile a 'snippet'
+$css = $less->compile('#myElem { background-color: #f00; }');
+// And then write to file?
+
+```
+
 # laraveless - Automated LESS compilation for Laravel
 
 Thanks to [leafo](https://github.com/leafo) for [lessphp](https://github.com/leafo/lessphp).
